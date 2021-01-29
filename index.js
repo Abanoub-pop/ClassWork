@@ -1,24 +1,26 @@
-const { Client } = require('pg')
-const client = new Client({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'eventplanner',
-    password: 'kokolet121',
-    port: 5432,
+const express = require('express')
+const bodyParser = require('body-parser')
+const app = express()
+const db = require('./queries')
+const port = 5432
+
+app.use(bodyParser.json())
+app.use(
+  bodyParser.urlencoded({
+    extended: true,
+  })
+)
+
+app.get('/', (request, response) => {
+  response.json({ info: 'Node.js, Express, and Postgres API' })
 })
-client.connect()
 
-client.query('SELECT * FROM attendees2')
-    .then(function (results) {
-        console.log("succefull");
-        console.log(results.rowCount)
-        client.end()
-    })
+app.get('/users', db.getUsers)
+app.get('/users/:id', db.getUserById)
+app.post('/users', db.createUser)
+app.put('/users/:id', db.updateUser)
+app.delete('/users/:id', db.deleteUser)
 
-    .catch(function (erro) {
-        console.log("connection failed");
-        console.log(error);
-        client.end();
-    });
-
-console.log("serving is connecting");
+app.listen(port, () => {
+  console.log(`App running on port ${port}.`)
+})
